@@ -1,0 +1,26 @@
+name: Push
+
+on: [push]
+
+jobs:
+  test-linux:
+    strategy:
+      matrix:
+        tag: ['5.1']
+    runs-on: ubuntu-latest
+    container:
+      image: swift:${{ matrix.tag }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Swift Tests
+      run: swift test -v
+    - name: SwiftLint
+      uses: norio-nomura/action-swiftlint@3.1.0
+  test-macos:
+    runs-on: [macos-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Swift Tests
+        run: swift test -v
+      - name: SwiftLint
+        run: brew install swiftlint && swiftlint
