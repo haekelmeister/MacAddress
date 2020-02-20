@@ -20,10 +20,6 @@ final class MacAddressTests: XCTestCase {
         ("testToHexadecimal", testToHexadecimal),
         ("testToInterfaceId", testToInterfaceId),
         ("testToLinkLocal", testToLinkLocal),
-        ("testSuccessfulParseFromString", testSuccessfulParseFromString),
-        ("testParseFromTooShortString", testParseFromTooShortString),
-        ("testParseFromString", testParseFromString),
-        ("testParseFromStringWithInvalidCharacter", testParseFromStringWithInvalidCharacter),
         ("testBytes", testBytes),
         ("testEquality", testEquality),
         ("testJsonEncoding", testJsonEncoding),
@@ -171,109 +167,6 @@ final class MacAddressTests: XCTestCase {
     func testToLinkLocal() {
         let mac = MacAddress(fromArray: [0x12, 0x34, 0x56, 0xAB, 0xCD, 0xEF])!
         XCTAssertEqual("ff80::1034:56ff:feab:cdef", mac.linkLocal)
-    }
-
-    func testSuccessfulParseFromString() {
-        XCTAssertEqual("0x123456abcdef", MacAddress(fromString: "0x123456ABCDEF")!.hexadecimal)
-        XCTAssertEqual("1234.56ab.cdef", MacAddress(fromString: "1234.56AB.CDEF")!.dotFormat)
-        XCTAssertEqual("12:34:56:ab:cd:ef", MacAddress(fromString: "12:34:56:AB:CD:EF")!.hexFormat)
-        XCTAssertEqual("12-34-56-ab-cd-ef", MacAddress(fromString: "12-34-56-AB-CD-EF")!.canonicalFormat)
-    }
-
-    func testParseFromTooShortString() {
-        XCTAssertEqual(nil, MacAddress(fromString: ""))
-        switch parseMacAddress(fromString: "") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(0), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "0"))
-        switch parseMacAddress(fromString: "0") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(1), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "123456ABCDEF"))
-        switch parseMacAddress(fromString: "123456ABCDEF") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(12), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "0x1234567890A"))
-        switch parseMacAddress(fromString: "0x1234567890A") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(13), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-    }
-
-    func testParseFromString() {
-        XCTAssertEqual(nil, MacAddress(fromString: "1234567890ABCD"))
-        switch parseMacAddress(fromString: "1234567890ABCD") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(14), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "0x00:00:00:00:"))
-        switch parseMacAddress(fromString: "0x00:00:00:00:") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(14), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "::::::::::::::"))
-        switch parseMacAddress(fromString: "::::::::::::::") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(14), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "1234567890ABCDEF"))
-        switch parseMacAddress(fromString: "1234567890ABCDEF") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(16), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "01234567890ABCDEF"))
-        switch parseMacAddress(fromString: "01234567890ABCDEF") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(17), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "0x1234567890ABCDE"))
-        switch parseMacAddress(fromString: "0x1234567890ABCDE") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(17), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "0x00:00:00:00:00:"))
-        switch parseMacAddress(fromString: "0x00:00:00:00:00:") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(17), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: ":::::::::::::::::"))
-        switch parseMacAddress(fromString: ":::::::::::::::::") {
-        case let .failure(invalidLength): XCTAssertEqual(ParseError.invalidLength(17), invalidLength)
-        default: XCTFail("Parsing not failed")
-        }
-    }
-
-    func testParseFromStringWithInvalidCharacter() {
-        XCTAssertEqual(nil, MacAddress(fromString: "0x0x0x0x0x0x0x"))
-        switch parseMacAddress(fromString: "0x0x0x0x0x0x0x") {
-        case let .failure(invalidCharacter): XCTAssertEqual(ParseError.invalidCharacter("x", 3), invalidCharacter)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "!0x00000000000"))
-        switch parseMacAddress(fromString: "!0x00000000000") {
-        case let .failure(invalidCharacter): XCTAssertEqual(ParseError.invalidCharacter("!", 0), invalidCharacter)
-        default: XCTFail("Parsing not failed")
-        }
-
-        XCTAssertEqual(nil, MacAddress(fromString: "0x00000000000!"))
-        switch parseMacAddress(fromString: "0x00000000000!") {
-        case let .failure(invalidCharacter): XCTAssertEqual(ParseError.invalidCharacter("!", 13), invalidCharacter)
-        default: XCTFail("Parsing not failed")
-        }
     }
 
     func testBytes() {
