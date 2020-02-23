@@ -1,21 +1,21 @@
 import Foundation
 
-enum InitType {
+public enum InitType {
     case zero
     case broadcast
 }
 
-struct MacAddress: Codable, Equatable {
+public struct MacAddress: Codable, Equatable {
     let eui: [UInt8]
 
-    init?(fromArray eui: [UInt8]) {
+    public init?(fromArray eui: [UInt8]) {
         guard eui.count == 6 else {
             return nil
         }
         self.eui = eui
     }
 
-    init?(fromString macAddress: String) {
+    public init?(fromString macAddress: String) {
         if case let .success(eui) = parseMacAddress(fromString: macAddress) {
             self.eui = eui
         } else {
@@ -23,50 +23,50 @@ struct MacAddress: Codable, Equatable {
         }
     }
 
-    init(withType type: InitType) {
+    public init(withType type: InitType) {
         switch type {
         case .zero: self.eui = Array(repeating: 0, count: 6)
         case .broadcast: self.eui = Array(repeating: 0xff, count: 6)
         }
     }
 
-    init(fromMacAddress mac: MacAddress) {
+    public init(fromMacAddress mac: MacAddress) {
         self.eui = mac.eui
     }
 
-    init() {
+    public init() {
         self.init(withType: .zero)
     }
 
-    var isZero: Bool {
+    public var isZero: Bool {
         self.eui == Array(repeating: 0, count: 6)
     }
 
-    var isBroadcast: Bool {
+    public var isBroadcast: Bool {
         self.eui == Array(repeating: 0xff, count: 6)
     }
 
-    /// Returns true if bit 1 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
-    var isUnicast: Bool {
+    // Returns true if bit 1 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
+    public var isUnicast: Bool {
         self.eui[0] & 1 == 0
     }
 
-    /// Returns true if bit 1 of Y is 1 in address 'xY:xx:xx:xx:xx:xx'
-    var isMulticast: Bool {
+    // Returns true if bit 1 of Y is 1 in address 'xY:xx:xx:xx:xx:xx'
+    public var isMulticast: Bool {
         self.eui[0] & 1 == 1
     }
 
-    /// Returns true if bit 2 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
-    var isUniversal: Bool {
+    // Returns true if bit 2 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
+    public var isUniversal: Bool {
         self.eui[0] & 1 << 1 == 0
     }
 
-    /// Returns true if bit 2 of Y is 1 in address 'xY:xx:xx:xx:xx:xx'
-    var isLocal: Bool {
+    // Returns true if bit 2 of Y is 1 in address 'xY:xx:xx:xx:xx:xx'
+    public var isLocal: Bool {
         self.eui[0] & 1 << 1 == 2
     }
 
-    var hexadecimal: String {
+    public var hexadecimal: String {
         String(format: "0x%02x%02x%02x%02x%02x%02x",
                self.eui[0],
                self.eui[1],
@@ -77,7 +77,7 @@ struct MacAddress: Codable, Equatable {
         )
     }
 
-    var interfaceId: String {
+    public var interfaceId: String {
         String(format: "%02x%02x:%02xff:fe%02x:%02x%02x",
                (self.eui[0] ^ 0x02),
                self.eui[1],
@@ -88,7 +88,7 @@ struct MacAddress: Codable, Equatable {
         )
     }
 
-    var linkLocal: String {
+    public var linkLocal: String {
         String(format: "ff80::%02x%02x:%02xff:fe%02x:%02x%02x",
                (self.eui[0] ^ 0x02),
                self.eui[1],
@@ -99,7 +99,7 @@ struct MacAddress: Codable, Equatable {
         )
     }
 
-    var hexFormat: String {
+    public var hexFormat: String {
         String(format: "%02x:%02x:%02x:%02x:%02x:%02x",
                self.eui[0],
                self.eui[1],
@@ -110,7 +110,7 @@ struct MacAddress: Codable, Equatable {
         )
     }
 
-    var dotFormat: String {
+    public var dotFormat: String {
         String(format: "%02x%02x.%02x%02x.%02x%02x",
                self.eui[0],
                self.eui[1],
@@ -121,7 +121,7 @@ struct MacAddress: Codable, Equatable {
         )
     }
 
-    var canonicalFormat: String {
+    public var canonicalFormat: String {
         String(format: "%02x-%02x-%02x-%02x-%02x-%02x",
                self.eui[0],
                self.eui[1],
@@ -134,18 +134,18 @@ struct MacAddress: Codable, Equatable {
 }
 
 extension MacAddress: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         "\(self.hexFormat)"
     }
 }
 
 extension MacAddress: CustomDebugStringConvertible {
-    var debugDescription: String {
+    public var debugDescription: String {
         "MacAddress(\"\(self.hexFormat)\")"
     }
 }
 
-internal enum ParseError: Error, Equatable {
+enum ParseError: Error, Equatable {
     case invalidLength(Int)
     case invalidCharacter(String, Int)
 }
@@ -165,7 +165,7 @@ extension ParseError: CustomDebugStringConvertible {
     }
 }
 
-internal func parseMacAddress(fromString macAddress: String) -> Result<[UInt8], ParseError> {
+func parseMacAddress(fromString macAddress: String) -> Result<[UInt8], ParseError> {
     var offset = 0
     var highNibble: Bool = false
     var eui: [UInt8] = Array(repeating: 0, count: 6)
