@@ -5,9 +5,11 @@ public enum InitType {
     case broadcast
 }
 
+/// MAC address data type for Swift, also known as EUI-48
 public struct MacAddress: Codable, Equatable {
     let eui: [UInt8]
 
+    /// fails in case the passed arrary is not 6 in length
     public init?(fromArray eui: [UInt8]) {
         guard eui.count == 6 else {
             return nil
@@ -15,6 +17,7 @@ public struct MacAddress: Codable, Equatable {
         self.eui = eui
     }
 
+    /// fails in case the given string could not be parsed successfully
     public init?(fromString macAddress: String) {
         if case let .success(eui) = parseMacAddress(fromString: macAddress) {
             self.eui = eui
@@ -38,34 +41,37 @@ public struct MacAddress: Codable, Equatable {
         self.init(withType: .zero)
     }
 
+    /// returns true in case all bits are 0
     public var isZero: Bool {
         self.eui == Array(repeating: 0, count: 6)
     }
 
+    /// returns true in case all bits are 1
     public var isBroadcast: Bool {
         self.eui == Array(repeating: 0xff, count: 6)
     }
 
-    // Returns true if bit 1 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
+    /// returns true if bit 1 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
     public var isUnicast: Bool {
         self.eui[0] & 1 == 0
     }
 
-    // Returns true if bit 1 of Y is 1 in address 'xY:xx:xx:xx:xx:xx'
+    /// returns true if bit 1 of Y is 1 in address 'xY:xx:xx:xx:xx:xx'
     public var isMulticast: Bool {
         self.eui[0] & 1 == 1
     }
 
-    // Returns true if bit 2 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
+    /// returns true if bit 2 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
     public var isUniversal: Bool {
         self.eui[0] & 1 << 1 == 0
     }
 
-    // Returns true if bit 2 of Y is 1 in address 'xY:xx:xx:xx:xx:xx'
+    /// returns true if bit 2 of Y is 1 in address 'xY:xx:xx:xx:xx:xx'
     public var isLocal: Bool {
         self.eui[0] & 1 << 1 == 2
     }
 
+    /// format the MAC address into the following form: 0x123456abcdef
     public var hexadecimal: String {
         String(format: "0x%02x%02x%02x%02x%02x%02x",
                self.eui[0],
@@ -99,6 +105,7 @@ public struct MacAddress: Codable, Equatable {
         )
     }
 
+    /// format the MAC address into the following form: 12:34:56:ab:cd:ef
     public var hexFormat: String {
         String(format: "%02x:%02x:%02x:%02x:%02x:%02x",
                self.eui[0],
@@ -110,6 +117,7 @@ public struct MacAddress: Codable, Equatable {
         )
     }
 
+    /// format the MAC address into the following form: 1234.56ab.cdef
     public var dotFormat: String {
         String(format: "%02x%02x.%02x%02x.%02x%02x",
                self.eui[0],
@@ -121,6 +129,7 @@ public struct MacAddress: Codable, Equatable {
         )
     }
 
+    /// format the MAC address into the following form: 12-34-56-ab-cd-ef
     public var canonicalFormat: String {
         String(format: "%02x-%02x-%02x-%02x-%02x-%02x",
                self.eui[0],
