@@ -43,12 +43,12 @@ public struct MacAddress: Codable, Equatable {
 
     /// returns true in case all bits are 0
     public var isZero: Bool {
-        self.eui == Array(repeating: 0, count: 6)
+        self.eui == [0, 0, 0, 0, 0, 0]
     }
 
     /// returns true in case all bits are 1
     public var isBroadcast: Bool {
-        self.eui == Array(repeating: 0xff, count: 6)
+        self.eui == [0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
     }
 
     /// returns true if bit 1 of Y is 0 in address 'xY:xx:xx:xx:xx:xx'
